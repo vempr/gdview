@@ -15,5 +15,11 @@
       "path": "./.nuxt/tsconfig.node.json"
     }
   ],
-  "allowImportingTsExtensions": true
+  "allowImportingTsExtensions": true,
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "types": ["node"],
+    "typeRoots": ["node_modules/@types"]
+  },
+  "exclude": ["node_modules"]
 }
