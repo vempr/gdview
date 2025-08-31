@@ -1,7 +1,7 @@
 CREATE TABLE "sessions" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" text PRIMARY KEY NOT NULL,
 	"secret_hash" "bytea" NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" integer DEFAULT EXTRACT(EPOCH FROM now())::integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "users" (

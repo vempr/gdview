@@ -1,8 +1,7 @@
-import { pgTable, serial, text, timestamp, customType, boolean } from 'drizzle-orm/pg-core';
-import { Buffer } from 'buffer';
+import { pgTable, serial, text, timestamp, customType, boolean, integer } from 'drizzle-orm/pg-core';
 
 const bytea = customType<{
-  data: Buffer;
+  data: Uint8Array<ArrayBufferLike>;
   default: false;
 }>({
   dataType() {
@@ -15,12 +14,12 @@ export const users = pgTable('users', {
   admin: boolean('admin').notNull().default(false),
   username: text('username').notNull(),
   password: text('password').notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow(),
 });
 
 export const sessions = pgTable('sessions', {
-  id: serial('id').primaryKey(),
+  id: text('id').primaryKey(),
   secret_hash: bytea('secret_hash').notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+  created_at: integer('created_at').notNull(),
 });

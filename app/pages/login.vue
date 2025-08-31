@@ -13,7 +13,6 @@ const credentials = reactive({
 });
 
 async function onSubmit() {
-  console.log('hello');
   try {
     const validated = loginSchema.parse(credentials);
     const res = await $fetch('/api/login', {
@@ -48,7 +47,7 @@ async function onSubmit() {
       <button type="submit">Submit</button>
     </form>
 
-    <h2>Errors</h2>
+    <h2>Client errors</h2>
     <p>{{ errors.username }}</p>
     <p>{{ errors.password }}</p>
   </main>
