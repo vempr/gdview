@@ -1,8 +1,14 @@
 <script setup lang="ts">
+definePageMeta({
+  middleware: 'authenticated',
+});
+
 import { ZodError } from 'zod';
 import { registerSchema } from '#shared/zod/auth';
 
-const unexpectedError = ref('');
+const { register } = useAuth();
+
+const serverError = ref('');
 const errors = reactive({
   username: '',
   password: '',
@@ -17,15 +23,9 @@ async function onSubmit() {
   try {
     const validated = registerSchema.parse(credentials);
 
-    const res = await $fetch('/api/register', {
-      method: 'POST',
-      body: validated,
-    });
-    if (res.error) {
-      unexpectedError.value = res.error;
-    } else {
-      return navigateTo('/profile');
-    }
+    const error = await register(validated);
+    if (error) serverError.value = error;
+    else return navigateTo('/profile');
   } catch (err) {
     if (err instanceof ZodError) {
       errors.username = err.issues[0]?.message ?? '';
@@ -37,7 +37,7 @@ async function onSubmit() {
 
 <template>
   <main>
-    <h1>Hello from login.vue</h1>
+    <h1>Hello from register.vue</h1>
 
     <form @submit.prevent="onSubmit">
       <label
@@ -56,5 +56,7 @@ async function onSubmit() {
     <h2>Client errors</h2>
     <p>{{ errors.username }}</p>
     <p>{{ errors.password }}</p>
+
+    <h2>Server error: {{ serverError }}</h2>
   </main>
 </template>

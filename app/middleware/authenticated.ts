@@ -1,7 +1,16 @@
-export default defineNuxtRouteMiddleware(async () => {
-  const { data, error } = await useFetch('/api/profile');
+const ALLOWED_GUEST_PATHS = ['/', '/about', '/login', '/register'];
+const ALLOWED_USER_PATHS = ['/', '/about', '/profile'];
 
-  if (error.value || data.value?.error) {
+export default defineNuxtRouteMiddleware(async (to) => {
+  const { isAuthenticated, fetchUser } = useAuth();
+  await fetchUser();
+  const isUserAuthenticated = isAuthenticated.value;
+
+  if (!isUserAuthenticated && !ALLOWED_GUEST_PATHS.includes(to.path)) {
     return navigateTo('/login');
+  }
+
+  if (isUserAuthenticated && !ALLOWED_USER_PATHS.includes(to.path)) {
+    return navigateTo('/profile');
   }
 });
