@@ -2,6 +2,7 @@
 import { ZodError } from 'zod';
 import { registerSchema } from '#shared/zod/auth';
 
+const unexpectedError = ref('');
 const errors = reactive({
   username: '',
   password: '',
@@ -15,11 +16,16 @@ const credentials = reactive({
 async function onSubmit() {
   try {
     const validated = registerSchema.parse(credentials);
+
     const res = await $fetch('/api/register', {
       method: 'POST',
       body: validated,
     });
-    console.log(res);
+    if (res.error) {
+      unexpectedError.value = res.error;
+    } else {
+      return navigateTo('/profile');
+    }
   } catch (err) {
     if (err instanceof ZodError) {
       errors.username = err.issues[0]?.message ?? '';

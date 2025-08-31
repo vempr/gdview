@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm';
 import { pgTable, serial, text, timestamp, customType, boolean, integer } from 'drizzle-orm/pg-core';
 
 const bytea = customType<{
@@ -20,6 +21,16 @@ export const users = pgTable('users', {
 
 export const sessions = pgTable('sessions', {
   id: text('id').primaryKey(),
+  user_id: integer('user_id')
+    .notNull()
+    .references(() => users.id),
   secret_hash: bytea('secret_hash').notNull(),
   created_at: integer('created_at').notNull(),
 });
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.user_id],
+    references: [users.id],
+  }),
+}));

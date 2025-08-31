@@ -1,7 +1,6 @@
 import { sessions } from '@@/db/schema';
 import { eq } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+import { DB } from './database';
 
 interface Session {
   id: string;
@@ -12,10 +11,6 @@ interface Session {
 interface SessionWithToken extends Session {
   token: string;
 }
-
-type DB = NodePgDatabase<Record<string, never>> & {
-  $client: Pool;
-};
 
 const SESSION_EXPIRES_IN_SECONDS = 60 * 60 * 24 * 30;
 
@@ -38,7 +33,7 @@ async function hashSecret(secret: string): Promise<Uint8Array> {
   return new Uint8Array(secretHashBuffer);
 }
 
-export async function createSession(db: DB): Promise<SessionWithToken> {
+export async function createSession(db: DB, user_id: number): Promise<SessionWithToken> {
   const now = new Date();
 
   const id = generateSecureRandomString();
@@ -56,6 +51,7 @@ export async function createSession(db: DB): Promise<SessionWithToken> {
 
   await db.insert(sessions).values({
     id: session.id,
+    user_id: user_id,
     secret_hash: session.secretHash,
     created_at: Math.floor(session.createdAt.getTime() / 1000),
   });
