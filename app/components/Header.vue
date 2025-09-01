@@ -1,21 +1,23 @@
 <script setup lang="ts">
-const { isAuthenticated, fetchUser } = useAuth();
-
-await fetchUser();
+import logo from '@@/public/logo.png';
+const { user } = useAuth();
 
 const links = computed(() => {
-  return isAuthenticated.value ? ['/', '/about', '/profile'] : ['/', '/about', '/login', '/register'];
+  return user.value ? ['/', '/about', '/profile'] : ['/', '/about', '/login', '/register'];
 });
 </script>
 
 <template>
   <header>
-    <NuxtImg src="/logo.png" class="rounded-lg size-20" />
+    <img :src="logo" class="rounded-lg size-20" />
+    <!-- NextImg doesn't work in development for some reason :/ -->
     <p class="italic">This is a header from Header.vue with <code>class="italic"</code></p>
-    <ul>
-      <li v-for="link in links">
-        <NuxtLink :to="link">{{ link }}</NuxtLink>
-      </li>
-    </ul>
+    <client-only>
+      <ul>
+        <li v-for="link in links">
+          <NuxtLink :to="link">{{ link }}</NuxtLink>
+        </li>
+      </ul>
+    </client-only>
   </header>
 </template>

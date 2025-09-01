@@ -1,61 +1,69 @@
-export const useAuth = () => {
-  const user = useState<any | null>('auth.user', () => null);
-  const isAuthenticated = computed(() => !!user.value);
+interface User {
+  id: number;
+  username: string;
+  admin: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
+const user = ref<User | null>(null);
+
+export const useAuth = () => {
   const fetchUser = async () => {
     try {
-      const { data } = await $fetch('/api/profile');
-      user.value = data;
-      return data;
+      const res = await $fetch('/api/profile');
+      if (res.user !== null) user.value = res.user;
+      return res;
     } catch (error) {
       user.value = null;
       return null;
     }
   };
 
+  const login = async (credentials: { username: string; password: string }) => {
+    const res = await $fetch('/api/login', {
+      method: 'POST',
+      body: credentials,
+      credentials: 'include',
+    });
+
+    if (res.success) user.value = res.user;
+    if (res.error) return res.error;
+  };
+
+  const register = async (credentials: { username: string; password: string }) => {
+    const res = await $fetch('/api/register', {
+      method: 'POST',
+      body: credentials,
+      credentials: 'include',
+    });
+
+    if (res.success) user.value = res.user;
+    if (res.error) return res.error;
+  };
+
   const logout = async () => {
     try {
-      await $fetch('/api/session', { method: 'DELETE' });
+      await $fetch('/api/session', { method: 'DELETE', credentials: 'include' });
       user.value = null;
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch (err) {
+      console.error('Logout failed:', err);
     }
   };
 
-  const login = async (credentials: any) => {
-    try {
-      const res = await $fetch('/api/login', {
-        method: 'POST',
-        body: credentials,
-      });
-      if (res.error) return res.error;
-
-      await fetchUser();
-    } catch (error) {
-      throw error;
+  if (import.meta.server) {
+    const nuxtApp = useNuxtApp();
+    const serverAuth = nuxtApp.ssrContext?.event.context.auth;
+    if (serverAuth?.user) {
+      user.value = serverAuth.user;
     }
-  };
-
-  const register = async (credentials: any) => {
-    try {
-      const res = await $fetch('/api/register', {
-        method: 'POST',
-        body: credentials,
-      });
-      if (res.error) return res.error;
-
-      await fetchUser();
-    } catch (error) {
-      throw error;
-    }
-  };
+  }
 
   return {
     user: readonly(user),
-    isAuthenticated,
     fetchUser,
-    logout,
     login,
     register,
+    logout,
   };
 };

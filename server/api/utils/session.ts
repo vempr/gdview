@@ -2,8 +2,9 @@ import { sessions } from '@@/db/schema';
 import { eq } from 'drizzle-orm';
 import { DB } from './database';
 
-interface Session {
+export interface Session {
   id: string;
+  user_id: number;
   secretHash: Uint8Array;
   createdAt: Date;
 }
@@ -44,6 +45,7 @@ export async function createSession(db: DB, user_id: number): Promise<SessionWit
 
   const session: SessionWithToken = {
     id,
+    user_id,
     secretHash,
     createdAt: now,
     token,
@@ -73,6 +75,7 @@ async function getSession(db: DB, sessionId: string): Promise<Session | null> {
   const s = result[0];
   const session: Session = {
     id: s.id,
+    user_id: s.user_id,
     secretHash: s.secret_hash,
     createdAt: new Date(s.created_at * 1000),
   };

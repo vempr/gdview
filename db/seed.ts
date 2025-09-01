@@ -1,11 +1,16 @@
-import { users, sessions } from './schema.ts';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { db } from '../server/api/utils/database';
+import { users } from './schema.ts';
+import { reset } from 'drizzle-seed';
+import * as schema from './schema.ts';
 
 const main = async () => {
   try {
-    const db = drizzle(process.env.DATABASE_URL!);
-    await db.delete(users);
-    await db.delete(sessions);
+    await reset(db, schema);
+    await db.insert(users).values({
+      username: 'admin',
+      password: 'admin',
+      admin: true,
+    });
   } catch (err) {
     console.log('*FAILED TO SEED DATABASE*');
     console.error(err);
